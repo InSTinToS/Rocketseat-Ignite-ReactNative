@@ -10,13 +10,27 @@ import {
 import Button from '../components/Native/Button';
 import SkillCard from '../components/SkillCard';
 
+interface SkillData {
+  id: string;
+  name: string;
+}
+
 const Home = () => {
+  const [mySkills, setMySkills] = useState<SkillData[]>([]);
   const [newSkill, setNewSkill] = useState('');
-  const [mySkills, setMySkills] = useState([]);
   const [greeting, setGretting] = useState('');
 
+  const handleRemoveSkill = (id: string) => {
+    setMySkills(before => before.filter(({ id: beforeId }) => beforeId !== id));
+  };
+
   const handleAddNewSkill = () => {
-    setMySkills(before => [...before, newSkill]);
+    const data = {
+      id: new Date().getTime().toString(),
+      name: newSkill,
+    };
+
+    setMySkills(before => [...before, data]);
   };
 
   useEffect(() => {
@@ -28,7 +42,7 @@ const Home = () => {
   }, []);
 
   return (
-    <SafeAreaView View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Hello World</Text>
 
       <Text style={styles.greeting}>{greeting}</Text>
@@ -40,15 +54,17 @@ const Home = () => {
         placeholderTextColor="#555"
       />
 
-      <Button onPress={handleAddNewSkill} />
+      <Button title="Add" onPress={handleAddNewSkill} />
 
       <Text style={[styles.title, { marginVertical: 50 }]}>My Skills</Text>
 
       <FlatList
         data={mySkills}
-        keyExtractor={item => item}
+        keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <SkillCard skill={item} />}
+        renderItem={({ item: { name, id } }) => (
+          <SkillCard skill={name} onPress={() => handleRemoveSkill(id)} />
+        )}
       />
     </SafeAreaView>
   );
