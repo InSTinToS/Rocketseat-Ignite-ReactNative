@@ -41,6 +41,11 @@ const Home = () => {
     else setGretting('Good Afternoon');
   }, []);
 
+  useEffect(() => {
+    console.clear();
+    console.log(mySkills);
+  }, [mySkills]);
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Hello World</Text>
@@ -63,7 +68,7 @@ const Home = () => {
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({ item: { name, id } }) => (
-          <SkillCard skill={name} onPress={() => handleRemoveSkill(id)} />
+          <SkillCard name={name} onPress={() => handleRemoveSkill(id)} />
         )}
       />
     </SafeAreaView>

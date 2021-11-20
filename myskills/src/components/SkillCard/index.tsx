@@ -7,13 +7,13 @@ import {
 } from 'react-native';
 
 interface SkillCardProps extends TouchableOpacityProps {
-  skill: string;
+  name: string;
 }
 
-const SkillCard = ({ skill, ...props }: SkillCardProps) => {
+const SkillCard = ({ name, ...props }: SkillCardProps) => {
   return (
     <TouchableOpacity style={styles.buttonSkill} {...props}>
-      <Text style={styles.textSkill}>{skill}</Text>
+      <Text style={styles.textSkill}>{name}</Text>
     </TouchableOpacity>
   );
 };
