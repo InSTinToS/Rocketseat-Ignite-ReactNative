@@ -15,6 +15,7 @@ import Container, {
   HighlightCards,
   Transactions,
   Title,
+  LogoutButton,
   TransactionsList,
 } from "./styles";
 
@@ -77,7 +78,9 @@ const Dashboard = () => {
             </User>
           </UserInfo>
 
-          <LogoutIcon />
+          <LogoutButton>
+            <LogoutIcon />
+          </LogoutButton>
         </UserWrapper>
       </Header>
 

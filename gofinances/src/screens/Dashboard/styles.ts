@@ -8,6 +8,7 @@ import {
 } from "react-native-iphone-x-helper";
 
 import { TransactionsData } from ".";
+import { BorderlessButton } from "react-native-gesture-handler";
 
 export const TransactionsList = styled.FlatList.attrs({
   showVerticalScrollIndicator: false,
@@ -37,8 +38,9 @@ export const HighlightCards = styled.ScrollView.attrs({
 })`
   position: absolute;
   top: ${RFPercentage(20)}px;
-  padding-bottom: 8px;
+
   width: 100%;
+  padding-bottom: 8px;
 `;
 
 export const LogoutIcon = styled(Feather).attrs({ name: "power" })`
@@ -47,6 +49,8 @@ export const LogoutIcon = styled(Feather).attrs({ name: "power" })`
   color: ${({ theme }) => theme.colors.secondary};
 `;
 
+export const LogoutButton = styled(BorderlessButton)``;
+
 export const UserWrapper = styled.View`
   flex-direction: row;
   align-items: center;
@@ -54,7 +58,8 @@ export const UserWrapper = styled.View`
 
   width: 100%;
   padding: 0 24px;
-  margin-top: ${getStatusBarHeight() + RFValue(28)}px;
+
+  margin-top: ${getStatusBarHeight() + RFValue(20)}px;
 `;
 
 export const UserGreeting = styled.Text`

@@ -30,7 +30,7 @@ const CategoryView = ({ category, setCategory, closeSelect }: Props) => {
   return (
     <Container>
       <Header>
-        <Title>{"category"}</Title>
+        <Title>{category.label}</Title>
       </Header>
 
       <FlatList
@@ -53,7 +53,7 @@ const CategoryView = ({ category, setCategory, closeSelect }: Props) => {
       />
 
       <Footer>
-        <Button title="Selecionar" onPress={closeSelect} />
+        <Button title="Selecionar" onPress={() => closeSelect()} />
       </Footer>
     </Container>
   );

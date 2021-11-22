@@ -1,7 +1,7 @@
 import React from "react";
 import { ThemeProvider } from "styled-components/native";
 import theme from "./src/global/styles/theme";
-import Dashboard from "./src/screens/Dashboard";
+
 import {
   useFonts,
   Poppins_400Regular,
@@ -9,9 +9,9 @@ import {
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
 import AppLoading from "expo-app-loading";
-import Register from "./src/screens/Register";
 
-import CategoryView from "./src/screens/CategoryView";
+import { NavigationContainer } from "@react-navigation/native";
+import Routes from "./src/routes/app.routes";
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -24,11 +24,9 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      {/* <Dashboard /> */}
-
-      <Register />
-
-      {/* <CategoryView /> */}
+      <NavigationContainer>
+        <Routes />
+      </NavigationContainer>
     </ThemeProvider>
   );
 };

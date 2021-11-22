@@ -1,6 +1,7 @@
 import { RFValue } from "react-native-responsive-fontsize";
 import styled from "styled-components/native";
 import { Feather } from "@expo/vector-icons";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 interface CategoryProps {
   isActive: boolean;
@@ -59,7 +60,8 @@ export const Header = styled.View`
   background-color: ${({ theme }) => theme.colors.primary};
 `;
 
-export const Container = styled.View`
+// resolver mal funcionamento de botão android
+export const Container = styled(GestureHandlerRootView)`
   flex: 1;
 
   background-color: ${({ theme }) => theme.colors.background};
