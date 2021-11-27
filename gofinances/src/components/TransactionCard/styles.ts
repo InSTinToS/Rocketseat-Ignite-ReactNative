@@ -1,9 +1,10 @@
 import styled from "styled-components/native";
 import { Feather } from "@expo/vector-icons";
 import { RFValue } from "react-native-responsive-fontsize";
+import { TransactionType } from ".";
 
 interface AmoutProps {
-  type: "positive" | "negative";
+  type: TransactionType;
 }
 
 export const Title = styled.Text`

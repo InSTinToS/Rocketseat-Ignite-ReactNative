@@ -1,13 +1,7 @@
 import { Formik, FormikValues } from "formik";
 import React, { useState } from "react";
-
-import {
-  Alert,
-  Keyboard,
-  Modal,
-  Text,
-  TouchableWithoutFeedback,
-} from "react-native";
+import uuid from "react-native-uuid";
+import { Alert, Keyboard, Modal, TouchableWithoutFeedback } from "react-native";
 
 import Button from "../../components/Form/Button";
 import CategorySelect from "../../components/Form/CategorySelect";
@@ -24,37 +18,68 @@ import Container, {
   FormContent,
   Fields,
 } from "./styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { TransactionsData } from "../Dashboard";
+import { TransactionType } from "../../components/TransactionCard";
+import collections from "../../utils/collections";
 
 const RegisterSchema = Yup.object().shape({
   name: Yup.string().required("Nome é obrigatório"),
   amount: Yup.number()
     .typeError("Informe um valor númerico")
     .positive("O valor deve ser positivo")
-    .required("Informe um valor"),
+    .required("O valor é obrigatório"),
 });
 
+type NavigationProps = {
+  navigate: (screen: string) => void;
+};
+
 const Register = () => {
+  const navigation = useNavigation<NavigationProps>();
+
   const [category, setCategory] = useState<Category>({
     name: "category",
     label: "Categoria",
   });
-  const [transaction, setTransaction] = useState("");
+  const [transaction, setTransaction] = useState<TransactionType>();
   const [categoryModal, setCategoryModal] = useState(false);
 
-  const handleRegister = (data: FormikValues) => {
+  const handleRegister = async (data: FormikValues, { resetForm }: any) => {
     if (!transaction) return Alert.alert("Selecione o tipo da transação");
 
     if (category.name === "category")
       return Alert.alert("Selecione uma categoria");
 
-    const requestData = {
+    const newData: TransactionsData = {
       name: data.name,
+      type: transaction,
       amount: data.amount,
-      transaction: transaction,
       category: category.name,
+      id: uuid.v4().toString(),
+      date: new Date().toString(),
     };
 
-    console.log(requestData);
+    try {
+      const beforeData = await AsyncStorage.getItem(collections.transactions);
+      const parsedBeforeData = beforeData ? JSON.parse(beforeData) : [];
+      const allData = [...parsedBeforeData, newData];
+
+      await AsyncStorage.setItem(
+        collections.transactions,
+        JSON.stringify(allData)
+      );
+    } catch (error) {
+      console.log(error);
+      Alert.alert("Não foi possivel salvar");
+    }
+
+    setCategory({ label: "Categoria", name: "category" });
+    setTransaction(undefined);
+    resetForm();
+
+    navigation.navigate("Listagem");
   };
 
   const handleCloseModal = () => {
@@ -65,7 +90,7 @@ const Register = () => {
     setCategoryModal(true);
   };
 
-  const handleTransactionTypeSelect = (type: string) => {
+  const handleTransactionTypeSelect = (type: TransactionType) => {
     type !== transaction && setTransaction(type);
   };
 
@@ -81,24 +106,33 @@ const Register = () => {
           validationSchema={RegisterSchema}
           initialValues={{ name: "", amount: "" }}
         >
-          {({ errors, values, handleSubmit, handleChange, handleBlur }) => (
+          {({
+            errors,
+            touched,
+            values,
+            handleSubmit,
+            handleChange,
+            handleBlur,
+          }) => (
             <FormContent>
               <Fields>
                 <Input
-                  error={errors.name}
                   placeholder="Nome"
+                  error={errors.name}
                   value={values.name}
                   autoCorrect={false}
+                  touched={touched.name}
                   autoCapitalize="sentences"
                   onBlur={handleBlur("name")}
                   onChangeText={handleChange("name")}
                 />
 
                 <Input
-                  error={errors.amount}
                   placeholder="Preço"
+                  error={errors.amount}
                   value={values.amount}
                   keyboardType="numeric"
+                  touched={touched.amount}
                   onBlur={handleBlur("amount")}
                   onChangeText={handleChange("amount")}
                 />
@@ -106,16 +140,16 @@ const Register = () => {
                 <TransactionsTypes>
                   <TransactionTypeButton
                     type="up"
-                    title="incoming"
-                    isActive={transaction === "up" ? true : false}
-                    onPress={() => handleTransactionTypeSelect("up")}
+                    title="Receber"
+                    isActive={transaction === "positive"}
+                    onPress={() => handleTransactionTypeSelect("positive")}
                   />
 
                   <TransactionTypeButton
                     type="down"
-                    title="outcoming"
-                    isActive={transaction === "down" ? true : false}
-                    onPress={() => handleTransactionTypeSelect("down")}
+                    title="Pagar"
+                    isActive={transaction === "negative"}
+                    onPress={() => handleTransactionTypeSelect("negative")}
                   />
                 </TransactionsTypes>
 

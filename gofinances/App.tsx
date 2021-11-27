@@ -12,6 +12,7 @@ import AppLoading from "expo-app-loading";
 
 import { NavigationContainer } from "@react-navigation/native";
 import Routes from "./src/routes/app.routes";
+import { StatusBar } from "react-native";
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -25,6 +26,12 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <NavigationContainer>
+        <StatusBar
+          translucent
+          barStyle="light-content"
+          backgroundColor="transparent"
+        />
+
         <Routes />
       </NavigationContainer>
     </ThemeProvider>

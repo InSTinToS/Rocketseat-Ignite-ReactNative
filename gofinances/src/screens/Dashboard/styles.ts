@@ -1,19 +1,38 @@
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import styled from "styled-components/native";
-import { FlatList } from "react-native";
-import { Feather } from "@expo/vector-icons";
+
+import { Feather, MaterialIcons } from "@expo/vector-icons";
 import {
   getBottomSpace,
   getStatusBarHeight,
 } from "react-native-iphone-x-helper";
 
-import { TransactionsData } from ".";
 import { BorderlessButton } from "react-native-gesture-handler";
+
+export const LoadContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const TransactionsIcon = styled(MaterialIcons).attrs({
+  size: 32,
+})`
+  color: ${({ theme }) => theme.colors.attention};
+`;
+
+export const TransactionsHeader = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+
+  padding: 0 16px;
+`;
 
 export const TransactionsList = styled.FlatList.attrs({
   showVerticalScrollIndicator: false,
   contentContainerStyle: {
     paddingBottom: getBottomSpace(),
+    paddingRight: 8,
   },
 })``;
 

@@ -1,7 +1,12 @@
-import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/core";
+import { format, getDate, getMonth } from "date-fns";
+import React, { useCallback, useEffect, useState } from "react";
 import HighlightCard from "../../components/HighlightCard";
+
 import TransactionCard, {
   TransactionCardData,
+  TransactionType,
 } from "../../components/TransactionCard";
 import Container, {
   Header,
@@ -10,6 +15,8 @@ import Container, {
   UserGreeting,
   UserInfo,
   UserName,
+  TransactionsHeader,
+  TransactionsIcon,
   UserWrapper,
   LogoutIcon,
   HighlightCards,
@@ -17,108 +24,221 @@ import Container, {
   Title,
   LogoutButton,
   TransactionsList,
+  LoadContainer,
 } from "./styles";
+import { BorderlessButton } from "react-native-gesture-handler";
+import toBRL from "../../utils/toBRL";
+import { ActivityIndicator } from "react-native";
+import { useTheme } from "styled-components";
+
+import collections from "../../utils/collections";
+import { ptBR } from "date-fns/locale";
 
 export interface TransactionsData extends TransactionCardData {
   id: string;
 }
 
+interface HighLightType {
+  total: string;
+  lastDate: Date;
+  firstDate: Date;
+}
+
+interface HighLightData {
+  entries: HighLightType;
+  total: HighLightType;
+  expensive: HighLightType;
+}
+
+const highLightInitialData = {
+  total: { total: toBRL(0), lastDate: new Date(), firstDate: new Date() },
+  entries: { total: toBRL(0), lastDate: new Date(), firstDate: new Date() },
+  expensive: { total: toBRL(0), lastDate: new Date(), firstDate: new Date() },
+};
+
+const getFilterDate = (
+  transactions: TransactionsData[],
+  position: "last" | "first",
+  type?: TransactionType
+): Date => {
+  const filter = type
+    ? transactions.filter((transaction) => transaction.type === type)
+    : transactions;
+
+  const onlyDates = filter.map(({ date }) => date);
+  const newDate = onlyDates[position === "last" ? onlyDates.length - 1 : 0];
+
+  return newDate ? new Date(newDate) : new Date();
+};
+
 const Dashboard = () => {
-  const transactionsData: TransactionsData[] = [
-    {
-      id: "1",
-      date: "13/04/2020 ",
-      type: "positive",
-      amount: "R$ 12.000,00",
-      title: "Desenvolvimento de site",
-      category: {
-        icon: "dollar-sign",
-        label: "Vendas",
-      },
-    },
-    {
-      id: "2",
-      date: "10/04/2020 ",
-      type: "negative",
-      amount: "R$ 59,00",
-      title: "Hamburgueria Pizzy",
-      category: {
-        icon: "coffee",
-        label: "Alimentação",
-      },
-    },
-    {
-      id: "3",
-      date: "10/04/2020 ",
-      type: "negative",
-      amount: "R$ 1.200,00",
-      title: "Aluguel do apartamento",
-      category: {
-        icon: "home",
-        label: "Casa",
-      },
-    },
-  ];
+  const [transactionsData, setTransactionsData] =
+    useState<TransactionsData[]>();
+  const [highLightData, setHighLightData] =
+    useState<HighLightData>(highLightInitialData);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const theme = useTheme();
+
+  const getLastTransactionLabel = (type?: TransactionType) => {
+    if (type) {
+      const lastDate =
+        type === "positive"
+          ? highLightData.entries.lastDate
+          : highLightData.expensive.lastDate;
+
+      const day = getDate(lastDate);
+      const label = type === "positive" ? "entrada" : "saída";
+      const month = format(lastDate, "MMMM", { locale: ptBR });
+
+      return `Última ${label} dia ${day} de ${month}.`;
+    }
+
+    const firstDate = getDate(highLightData.total.firstDate);
+    const lastDate = getDate(highLightData.total.lastDate);
+
+    if (firstDate && lastDate)
+      return `Entre ${firstDate} à ${lastDate} de abril`;
+
+    return "";
+  };
+
+  const loadTransactions = async () => {
+    let entriesTotal = 0;
+    let expensiveTotal = 0;
+
+    const storageData = await AsyncStorage.getItem(collections.transactions);
+
+    if (storageData) {
+      const parsedTransactions: TransactionsData[] = JSON.parse(storageData);
+
+      if (parsedTransactions.length !== 0) {
+        const formattedParsedTransactions = parsedTransactions.map(
+          (transaction) => {
+            const amountLabel = toBRL(transaction.amount);
+
+            const dateLabel = format(new Date(transaction.date), "dd/MM/yyyy");
+
+            transaction.type === "positive"
+              ? (entriesTotal += Number(transaction.amount))
+              : (expensiveTotal += Number(transaction.amount));
+
+            return { ...transaction, date: dateLabel, amount: amountLabel };
+          }
+        );
+
+        setHighLightData({
+          entries: {
+            total: toBRL(entriesTotal),
+            lastDate: getFilterDate(parsedTransactions, "last", "positive"),
+            firstDate: getFilterDate(parsedTransactions, "first", "positive"),
+          },
+          expensive: {
+            total: toBRL(expensiveTotal),
+            lastDate: getFilterDate(parsedTransactions, "last", "negative"),
+            firstDate: getFilterDate(parsedTransactions, "first", "negative"),
+          },
+          total: {
+            total: toBRL(entriesTotal - expensiveTotal),
+            lastDate: getFilterDate(parsedTransactions, "last"),
+            firstDate: getFilterDate(parsedTransactions, "first"),
+          },
+        });
+
+        setTransactionsData(formattedParsedTransactions);
+      }
+    }
+
+    if (isLoading === true) setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadTransactions();
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadTransactions();
+    }, [])
+  );
 
   return (
     <Container>
-      <Header>
-        <UserWrapper>
-          <UserInfo>
-            <Avatar
-              source={{
-                uri: "https://avatars.githubusercontent.com/u/52141015?v=4",
-              }}
+      {isLoading ? (
+        <LoadContainer>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </LoadContainer>
+      ) : (
+        <>
+          <Header>
+            <UserWrapper>
+              <UserInfo>
+                <Avatar
+                  source={{
+                    uri: "https://avatars.githubusercontent.com/u/52141015?v=4",
+                  }}
+                />
+
+                <User>
+                  <UserGreeting>Olá,</UserGreeting>
+
+                  <UserName>Miguel</UserName>
+                </User>
+              </UserInfo>
+
+              <LogoutButton>
+                <LogoutIcon />
+              </LogoutButton>
+            </UserWrapper>
+          </Header>
+
+          <HighlightCards>
+            <HighlightCard
+              type="up"
+              title="Entradas"
+              amount={highLightData.entries.total}
+              lastTransaction={getLastTransactionLabel("positive")}
             />
 
-            <User>
-              <UserGreeting>Olá,</UserGreeting>
+            <HighlightCard
+              type="down"
+              title="Saidas"
+              amount={highLightData.expensive.total}
+              lastTransaction={getLastTransactionLabel("negative")}
+            />
 
-              <UserName>Miguel</UserName>
-            </User>
-          </UserInfo>
+            <HighlightCard
+              title="Total"
+              amount={highLightData.total.total}
+              lastTransaction={getLastTransactionLabel()}
+            />
+          </HighlightCards>
 
-          <LogoutButton>
-            <LogoutIcon />
-          </LogoutButton>
-        </UserWrapper>
-      </Header>
+          <Transactions>
+            <TransactionsHeader>
+              <Title>Listagem</Title>
 
-      <HighlightCards>
-        <HighlightCard
-          type="up"
-          title="Entradas"
-          amount="R$ 17.400,00"
-          lastTransaction="Última entrada dia 13 de abril."
-        />
+              <BorderlessButton
+                onPress={async () => {
+                  await AsyncStorage.clear();
+                  setHighLightData(highLightInitialData);
+                  setTransactionsData(undefined);
+                }}
+              >
+                <TransactionsIcon name="delete-forever" />
+              </BorderlessButton>
+            </TransactionsHeader>
 
-        <HighlightCard
-          type="down"
-          title="Saidas"
-          amount="R$ 1.259,00"
-          lastTransaction="Última saída dia 03 de abril."
-        />
-
-        <HighlightCard
-          title="Total"
-          amount="R$ 16.141,34"
-          lastTransaction="01 à 16 de abril."
-        />
-      </HighlightCards>
-
-      <Transactions>
-        <Title>Listagem</Title>
-
-        <TransactionsList
-          data={transactionsData}
-          renderItem={({ item }) => {
-            //new () => FlatList<TransactionsData> not working
-            const typedItem = item as TransactionCardData;
-
-            return <TransactionCard data={typedItem} />;
-          }}
-        />
-      </Transactions>
+            <TransactionsList
+              data={transactionsData}
+              renderItem={({ item }) => {
+                const typedItem = item as TransactionCardData;
+                return <TransactionCard data={typedItem} />;
+              }}
+            />
+          </Transactions>
+        </>
+      )}
     </Container>
   );
 };
