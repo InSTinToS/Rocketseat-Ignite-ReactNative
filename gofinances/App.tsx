@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ThemeProvider } from "styled-components/native";
 import theme from "./src/global/styles/theme";
 
@@ -10,36 +10,33 @@ import {
 } from "@expo-google-fonts/poppins";
 import AppLoading from "expo-app-loading";
 
-import { NavigationContainer } from "@react-navigation/native";
-import Routes from "./src/routes/app.routes";
 import { StatusBar } from "react-native";
-import SignIn from "./src/screens/SignIn";
 
-import { AuthProvider } from "./src/hooks/auth";
+import { AuthProvider, useAuth } from "./src/hooks/auth";
+import Routes from "./src/routes/index.routes";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const App = () => {
+  const { userStorageLoading } = useAuth();
+
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
     Poppins_700Bold,
   });
 
-  if (!fontsLoaded) return <AppLoading />;
+  if (!fontsLoaded && userStorageLoading) return <AppLoading />;
 
   return (
     <ThemeProvider theme={theme}>
-      {/* <NavigationContainer>
       <StatusBar
         translucent
         barStyle="light-content"
         backgroundColor="transparent"
       />
 
-      <Routes />
-    </NavigationContainer> */}
-
       <AuthProvider>
-        <SignIn />
+        <Routes />
       </AuthProvider>
     </ThemeProvider>
   );

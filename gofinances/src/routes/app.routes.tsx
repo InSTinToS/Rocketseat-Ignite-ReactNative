@@ -8,7 +8,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import Resume from "../screens/Resume";
 const { Navigator, Screen } = createBottomTabNavigator();
 
-const Routes = () => {
+const AppRoutes = () => {
   const theme = useTheme();
 
   return (
@@ -65,4 +65,4 @@ const Routes = () => {
   );
 };
 
-export default Routes;
+export default AppRoutes;

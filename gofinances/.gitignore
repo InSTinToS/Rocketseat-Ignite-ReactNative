@@ -20,6 +20,7 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
+.env
 project.xcworkspace
 
 # Android/IntelliJ

@@ -23,6 +23,7 @@ import { useNavigation } from "@react-navigation/native";
 import { TransactionsData } from "../Dashboard";
 import { TransactionType } from "../../components/TransactionCard";
 import collections from "../../utils/collections";
+import { useAuth } from "../../hooks/auth";
 
 const RegisterSchema = Yup.object().shape({
   name: Yup.string().required("Nome é obrigatório"),
@@ -37,6 +38,8 @@ type NavigationProps = {
 };
 
 const Register = () => {
+  const { user } = useAuth();
+
   const navigation = useNavigation<NavigationProps>();
 
   const [category, setCategory] = useState<Category>({
@@ -62,14 +65,18 @@ const Register = () => {
     };
 
     try {
-      const beforeData = await AsyncStorage.getItem(collections.transactions);
-      const parsedBeforeData = beforeData ? JSON.parse(beforeData) : [];
-      const allData = [...parsedBeforeData, newData];
+      if (user?.id) {
+        const beforeData = await AsyncStorage.getItem(
+          collections.transactions(user.id)
+        );
+        const parsedBeforeData = beforeData ? JSON.parse(beforeData) : [];
+        const allData = [...parsedBeforeData, newData];
 
-      await AsyncStorage.setItem(
-        collections.transactions,
-        JSON.stringify(allData)
-      );
+        await AsyncStorage.setItem(
+          collections.transactions(user.id),
+          JSON.stringify(allData)
+        );
+      }
     } catch (error) {
       console.log(error);
       Alert.alert("Não foi possivel salvar");

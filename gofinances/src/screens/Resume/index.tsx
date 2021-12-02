@@ -10,6 +10,7 @@ import { RFValue } from "react-native-responsive-fontsize";
 import { useTheme } from "styled-components";
 import { VictoryPie } from "victory-native";
 import HistoryCard from "../../components/HistoryCard";
+import { useAuth } from "../../hooks/auth";
 import { categories } from "../../utils/categories";
 import collections from "../../utils/collections";
 import toBRL from "../../utils/toBRL";
@@ -38,6 +39,7 @@ interface CategoriesTotal {
 
 const Resume = () => {
   const theme = useTheme();
+  const { user } = useAuth();
   const bottomTabBar = useBottomTabBarHeight();
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -51,44 +53,48 @@ const Resume = () => {
   };
 
   const loadData = async () => {
-    const newCategoriesTotal: CategoriesTotal[] = [];
-    const res = await AsyncStorage.getItem(collections.transactions);
-    const formattedRes: TransactionsData[] = res ? JSON.parse(res) : [];
+    if (user?.id) {
+      const newCategoriesTotal: CategoriesTotal[] = [];
+      const res = await AsyncStorage.getItem(collections.transactions(user.id));
+      const formattedRes: TransactionsData[] = res ? JSON.parse(res) : [];
 
-    const expensives = formattedRes.filter(
-      ({ type, date }) =>
-        type === "negative" &&
-        new Date(date).getMonth() === selectedDate.getMonth() &&
-        new Date(date).getFullYear() === selectedDate.getFullYear()
-    );
-
-    categories.forEach((category) => {
-      let categorySum = 0;
-
-      expensives.forEach((expensive) => {
-        if (expensive.category === category.name)
-          categorySum += Number(expensive.amount);
-      });
-
-      const expensivesTotal = expensives.reduce(
-        (acc: number, expensive: TransactionsData) =>
-          (acc += Number(expensive.amount)),
-        0
+      const expensives = formattedRes.filter(
+        ({ type, date }) =>
+          type === "negative" &&
+          new Date(date).getMonth() === selectedDate.getMonth() &&
+          new Date(date).getFullYear() === selectedDate.getFullYear()
       );
 
-      const percent = `${((categorySum / expensivesTotal) * 100).toFixed(0)}%`;
+      categories.forEach((category) => {
+        let categorySum = 0;
 
-      if (categorySum > 0)
-        newCategoriesTotal.push({
-          percent,
-          total: categorySum,
-          label: category.label,
-          color: category.color,
-          totalLabel: toBRL(categorySum),
+        expensives.forEach((expensive) => {
+          if (expensive.category === category.name)
+            categorySum += Number(expensive.amount);
         });
-    });
 
-    setCategoriesTotal(newCategoriesTotal);
+        const expensivesTotal = expensives.reduce(
+          (acc: number, expensive: TransactionsData) =>
+            (acc += Number(expensive.amount)),
+          0
+        );
+
+        const percent = `${((categorySum / expensivesTotal) * 100).toFixed(
+          0
+        )}%`;
+
+        if (categorySum > 0)
+          newCategoriesTotal.push({
+            percent,
+            total: categorySum,
+            label: category.label,
+            color: category.color,
+            totalLabel: toBRL(categorySum),
+          });
+      });
+
+      setCategoriesTotal(newCategoriesTotal);
+    }
     setIsLoading(false);
   };
 

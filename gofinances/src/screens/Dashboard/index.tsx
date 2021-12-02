@@ -33,6 +33,7 @@ import { useTheme } from "styled-components";
 
 import collections from "../../utils/collections";
 import { ptBR } from "date-fns/locale";
+import { useAuth } from "../../hooks/auth";
 
 export interface TransactionsData extends TransactionCardData {
   id: string;
@@ -40,8 +41,8 @@ export interface TransactionsData extends TransactionCardData {
 
 interface HighLightType {
   total: string;
-  lastDate: Date;
-  firstDate: Date;
+  lastDate?: Date;
+  firstDate?: Date;
 }
 
 interface HighLightData {
@@ -51,9 +52,9 @@ interface HighLightData {
 }
 
 const highLightInitialData = {
-  total: { total: toBRL(0), lastDate: new Date(), firstDate: new Date() },
-  entries: { total: toBRL(0), lastDate: new Date(), firstDate: new Date() },
-  expensive: { total: toBRL(0), lastDate: new Date(), firstDate: new Date() },
+  total: { total: toBRL(0) },
+  entries: { total: toBRL(0) },
+  expensive: { total: toBRL(0) },
 };
 
 const getFilterDate = (
@@ -79,73 +80,92 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const theme = useTheme();
+  const { signOut, user } = useAuth();
 
   const getLastTransactionLabel = (type?: TransactionType) => {
+    const lastEntry = highLightData.entries.lastDate;
+    const lastExpensive = highLightData.expensive.lastDate;
+
     if (type) {
-      const lastDate =
-        type === "positive"
-          ? highLightData.entries.lastDate
-          : highLightData.expensive.lastDate;
+      const lastDate = type === "positive" ? lastEntry : lastExpensive;
 
-      const day = getDate(lastDate);
-      const label = type === "positive" ? "entrada" : "saída";
-      const month = format(lastDate, "MMMM", { locale: ptBR });
+      if (lastDate) {
+        const day = getDate(lastDate);
+        const label = type === "positive" ? "entrada" : "saída";
+        const month = format(lastDate, "MMMM", { locale: ptBR });
 
-      return `Última ${label} dia ${day} de ${month}.`;
+        return `Última ${label} dia ${day} de ${month}.`;
+      }
+
+      return `Sem útimas ${
+        type === "positive" ? "entradas" : "saídas"
+      } armazenadas.`;
     }
 
-    const firstDate = getDate(highLightData.total.firstDate);
-    const lastDate = getDate(highLightData.total.lastDate);
+    const totalFirstDate = highLightData.total.firstDate;
+    const totalLastDate = highLightData.total.lastDate;
 
-    if (firstDate && lastDate)
-      return `Entre ${firstDate} à ${lastDate} de abril`;
+    if (totalFirstDate && totalLastDate) {
+      const firstDate = getDate(totalFirstDate);
+      const lastDate = getDate(totalLastDate);
 
-    return "";
+      if (firstDate && lastDate)
+        return `Entre ${firstDate} à ${lastDate} de abril`;
+    }
+
+    return "Sem transações armazenadas.";
   };
 
   const loadTransactions = async () => {
     let entriesTotal = 0;
     let expensiveTotal = 0;
 
-    const storageData = await AsyncStorage.getItem(collections.transactions);
+    if (user?.id) {
+      const storageData = await AsyncStorage.getItem(
+        collections.transactions(user.id)
+      );
 
-    if (storageData) {
-      const parsedTransactions: TransactionsData[] = JSON.parse(storageData);
+      if (storageData) {
+        const parsedTransactions: TransactionsData[] = JSON.parse(storageData);
 
-      if (parsedTransactions.length !== 0) {
-        const formattedParsedTransactions = parsedTransactions.map(
-          (transaction) => {
-            const amountLabel = toBRL(transaction.amount);
+        if (parsedTransactions.length !== 0) {
+          const formattedParsedTransactions = parsedTransactions.map(
+            (transaction) => {
+              const amountLabel = toBRL(transaction.amount);
 
-            const dateLabel = format(new Date(transaction.date), "dd/MM/yyyy");
+              const dateLabel = format(
+                new Date(transaction.date),
+                "dd/MM/yyyy"
+              );
 
-            transaction.type === "positive"
-              ? (entriesTotal += Number(transaction.amount))
-              : (expensiveTotal += Number(transaction.amount));
+              transaction.type === "positive"
+                ? (entriesTotal += Number(transaction.amount))
+                : (expensiveTotal += Number(transaction.amount));
 
-            return { ...transaction, date: dateLabel, amount: amountLabel };
-          }
-        );
+              return { ...transaction, date: dateLabel, amount: amountLabel };
+            }
+          );
 
-        setHighLightData({
-          entries: {
-            total: toBRL(entriesTotal),
-            lastDate: getFilterDate(parsedTransactions, "last", "positive"),
-            firstDate: getFilterDate(parsedTransactions, "first", "positive"),
-          },
-          expensive: {
-            total: toBRL(expensiveTotal),
-            lastDate: getFilterDate(parsedTransactions, "last", "negative"),
-            firstDate: getFilterDate(parsedTransactions, "first", "negative"),
-          },
-          total: {
-            total: toBRL(entriesTotal - expensiveTotal),
-            lastDate: getFilterDate(parsedTransactions, "last"),
-            firstDate: getFilterDate(parsedTransactions, "first"),
-          },
-        });
+          setHighLightData({
+            entries: {
+              total: toBRL(entriesTotal),
+              lastDate: getFilterDate(parsedTransactions, "last", "positive"),
+              firstDate: getFilterDate(parsedTransactions, "first", "positive"),
+            },
+            expensive: {
+              total: toBRL(expensiveTotal),
+              lastDate: getFilterDate(parsedTransactions, "last", "negative"),
+              firstDate: getFilterDate(parsedTransactions, "first", "negative"),
+            },
+            total: {
+              total: toBRL(entriesTotal - expensiveTotal),
+              lastDate: getFilterDate(parsedTransactions, "last"),
+              firstDate: getFilterDate(parsedTransactions, "first"),
+            },
+          });
 
-        setTransactionsData(formattedParsedTransactions);
+          setTransactionsData(formattedParsedTransactions);
+        }
       }
     }
 
@@ -173,20 +193,16 @@ const Dashboard = () => {
           <Header>
             <UserWrapper>
               <UserInfo>
-                <Avatar
-                  source={{
-                    uri: "https://avatars.githubusercontent.com/u/52141015?v=4",
-                  }}
-                />
+                <Avatar source={{ uri: user?.photo }} />
 
                 <User>
                   <UserGreeting>Olá,</UserGreeting>
 
-                  <UserName>Miguel</UserName>
+                  <UserName>{user?.name}</UserName>
                 </User>
               </UserInfo>
 
-              <LogoutButton>
+              <LogoutButton onPress={signOut}>
                 <LogoutIcon />
               </LogoutButton>
             </UserWrapper>
