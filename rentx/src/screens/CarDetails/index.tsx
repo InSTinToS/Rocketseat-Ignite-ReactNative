@@ -3,7 +3,6 @@ import {
   About,
   Accessories,
   Brand,
-  CarContent,
   CarImages,
   Container,
   Description,
@@ -15,7 +14,7 @@ import {
   Price,
   Rent
 } from './styles'
-import { StatusBar } from 'react-native'
+import { StatusBar, StyleSheet } from 'react-native'
 
 import BackButton from 'src/components/BackButton'
 import ImageSlider from 'src/components/ImageSlider'
@@ -26,14 +25,38 @@ import { NavigationProps } from 'src/types/react-native/navigation'
 import getAccessoryIcon from 'src/utils/getAccessoryIcon'
 
 import { useNavigation, useRoute } from '@react-navigation/native'
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
+import Animated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue
+} from 'react-native-reanimated'
+import { useTheme } from 'styled-components'
 
 interface Params {
   car: CarResType
 }
 
 const CarDetails = () => {
+  const theme = useTheme()
   const navigation = useNavigation<NavigationProps<Params | void>>()
   const route = useRoute()
+
+  const scrollY = useSharedValue(0)
+
+  const sliderCarsStyleAnimation = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, 150], [1, 0])
+  }))
+
+  const headerStyleAnimation = useAnimatedStyle(() => ({
+    height: interpolate(scrollY.value, [0, 200], [200, 90], Extrapolate.CLAMP)
+  }))
+
+  const scrollHandler = useAnimatedScrollHandler(event => {
+    scrollY.value = event.contentOffset.y
+  })
 
   const { car } = route.params as Params
 
@@ -43,21 +66,41 @@ const CarDetails = () => {
 
   return (
     <Container>
-      <Header>
-        <StatusBar
-          translucent
-          barStyle='dark-content'
-          backgroundColor='transparent'
-        />
+      <Animated.View
+        style={[
+          headerStyleAnimation,
+          styles.header,
+          { backgroundColor: theme.colors.background_secondary }
+        ]}
+      >
+        <Header>
+          <StatusBar
+            translucent
+            barStyle='dark-content'
+            backgroundColor='transparent'
+          />
 
-        <BackButton onPress={() => navigation.navigate('Home')} />
-      </Header>
+          <BackButton onPress={() => navigation.navigate('Home')} />
+        </Header>
 
-      <CarContent>
-        <CarImages>
-          <ImageSlider imageUrls={car.photos} />
-        </CarImages>
+        <Animated.View style={[sliderCarsStyleAnimation]}>
+          <CarImages>
+            <ImageSlider imageUrls={car.photos} />
+          </CarImages>
+        </Animated.View>
+      </Animated.View>
 
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        // 16 porque 1000/60 = 16.6 = 60fps
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingHorizontal: 24,
+          paddingTop: getStatusBarHeight() + 160,
+          alignItems: 'center'
+        }}
+      >
         <Details>
           <Description>
             <Brand>{car.brand}</Brand>
@@ -81,8 +124,14 @@ const CarDetails = () => {
           ))}
         </Accessories>
 
-        <About>{car.about}</About>
-      </CarContent>
+        <About>
+          {car.about}
+          {car.about}
+          {car.about}
+          {car.about}
+          {car.about}
+        </About>
+      </Animated.ScrollView>
 
       <Footer>
         <Button
@@ -94,5 +143,13 @@ const CarDetails = () => {
     </Container>
   )
 }
+
+const styles = StyleSheet.create({
+  header: {
+    position: 'absolute',
+    overflow: 'hidden',
+    zIndex: 1
+  }
+})
 
 export default CarDetails

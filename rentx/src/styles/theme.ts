@@ -1,7 +1,7 @@
 const theme = {
   colors: {
     main: '#dc1637',
-    main_light: '#fdedef',
+    main_light: '#ef6179',
 
     shape: '#e1e1e8',
     shape_dark: '#29292e',

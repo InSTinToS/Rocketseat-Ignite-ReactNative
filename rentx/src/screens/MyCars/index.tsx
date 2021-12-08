@@ -20,6 +20,7 @@ import { CarResType } from 'src/types/res/Car'
 import api from 'src/services/api'
 import { BackButton, Car, Load } from 'src/components'
 import { NavigationProps } from 'src/types/react-native/navigation'
+import AnimatedLoading from 'src/components/AnimatedLoading'
 
 import { AntDesign } from '@expo/vector-icons'
 import { useNavigation } from '@react-navigation/core'
@@ -79,7 +80,7 @@ const MyCars = () => {
       </Header>
 
       {loading ? (
-        <Load />
+        <AnimatedLoading />
       ) : (
         <Content>
           <Appointments>

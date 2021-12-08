@@ -7,17 +7,6 @@ import { RFValue } from 'react-native-responsive-fontsize'
 import styled from 'styled-components/native'
 
 export const MyCarsButton = styled(RectButton)`
-  position: absolute;
-  right: 22px;
-  bottom: 13px;
-
-  align-items: center;
-  justify-content: center;
-
-  width: 60px;
-  height: 60px;
-  border-radius: 30px;
-
   background-color: ${({ theme }) => theme.colors.main};
 `
 

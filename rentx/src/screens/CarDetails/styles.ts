@@ -25,21 +25,12 @@ export const About = styled.Text`
   margin-top: 23px;
 
   text-align: justify;
-  text-transform: uppercase;
   font-size: ${RFValue(15)}px;
   line-height: ${RFValue(25)}px;
   font-family: ${({ theme }) => theme.fonts.primary_400};
 
   color: ${({ theme }) => theme.colors.text};
 `
-
-export const CarContent = styled.ScrollView.attrs({
-  showVerticalScrollIndicator: false,
-  contentContainerStyle: {
-    padding: 24,
-    alignItems: 'center'
-  }
-})``
 
 export const Details = styled.View`
   flex-direction: row;
