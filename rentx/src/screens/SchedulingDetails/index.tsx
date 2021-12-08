@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Accessories,
   Brand,
@@ -24,20 +24,17 @@ import {
   RentalPriceQuota,
   RentalPriceTotal
 } from './styles'
-import { StatusBar } from 'react-native'
+import { Alert, StatusBar } from 'react-native'
 
 import { Accessory, BackButton, Button, ImageSlider } from 'src/components'
-import {
-  Acceleration,
-  Exchange,
-  Force,
-  Gasoline,
-  People,
-  Speed
-} from 'src/assets'
+import { NavigationProps } from 'src/types/react-native/navigation'
+import { CarResType } from 'src/types/res/Car'
+import getAccessoryIcon from 'src/utils/getAccessoryIcon'
+import api from 'src/services/api'
 
 import { Feather } from '@expo/vector-icons'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import { format } from 'date-fns'
 import { RFValue } from 'react-native-responsive-fontsize'
 import { useTheme } from 'styled-components'
 
@@ -49,14 +46,48 @@ const images = [
   'https://freepngimg.com/thumb/audi/35227-5-audi-rs5-red.png',
   'https://freepngimg.com/thumb/audi/35227-5-audi-rs5-red.png'
 ]
+interface Params {
+  car: CarResType
+  dates?: string[]
+}
 
 const ShedulingDetails = () => {
   const theme = useTheme()
-  const navigation = useNavigation()
+  const [loading, setLoading] = useState(false)
 
-  const handleConfirm = () => {
-    navigation.navigate('SchedulingComplete' as never)
+  const navigation = useNavigation<NavigationProps<Params | void>>()
+  const route = useRoute()
+  const { car, dates } = route.params as Params
+
+  const handleConfirm = async () => {
+    setLoading(true)
+    const schedulesByCar = await api.get(`/schedules_bycars/${car.id}`)
+
+    const unavailableDates = [
+      ...schedulesByCar.data.unavailable_dates,
+      ...dates
+    ]
+
+    api.post(`/schedules_byuser`, {
+      car,
+      startDate: format(new Date(dates[0]), 'dd/MM/yyyy'),
+      endDate: format(new Date(dates[dates.length - 1]), 'dd/MM/yyyy'),
+      user_id: 1
+    })
+
+    api
+      .put(`/schedules_bycars/${car.id}`, {
+        id: car.id,
+        unavailable_dates: unavailableDates
+      })
+      .then(() => navigation.navigate('SchedulingComplete'))
+      .catch(() => {
+        setLoading(false)
+        Alert.alert('Não foi possível confirmar o agendamento')
+      })
   }
+
+  const totalRent = dates.length * Number(car.rent.price)
 
   return (
     <Container>
@@ -67,35 +98,37 @@ const ShedulingDetails = () => {
           backgroundColor='transparent'
         />
 
-        <BackButton onPress={() => {}} />
+        <BackButton
+          onPress={() => navigation.navigate('Scheduling', { car })}
+        />
       </Header>
 
       <CarContent>
         <CarImages>
-          <ImageSlider imageUrls={images} />
+          <ImageSlider imageUrls={car.photos} />
         </CarImages>
 
         <Details>
           <Description>
-            <Brand></Brand>
-            <Name></Name>
+            <Brand>{car.brand}</Brand>
+            <Name>{car.name}</Name>
           </Description>
 
           <Rent>
-            <Period></Period>
+            <Period>{car.rent.period}</Period>
 
-            <Price></Price>
+            <Price>{car.rent.price}</Price>
           </Rent>
         </Details>
 
         <Accessories>
-          <Accessory name='300Km/h' icon={Speed} />
-          <Accessory name='3.2s' icon={Acceleration} />
-          <Accessory name='800HP' icon={Force} />
-          <Accessory name='Gasolina' icon={Gasoline} />
-          <Accessory name='300Km/h' icon={Speed} />
-          <Accessory name='Auto' icon={Exchange} />
-          <Accessory name='2 pessoas' icon={People} />
+          {car.accessories.map(accessory => (
+            <Accessory
+              key={accessory.type}
+              name={accessory.name}
+              icon={getAccessoryIcon(accessory.type)}
+            />
+          ))}
         </Accessories>
 
         <RentalPeriod>
@@ -108,27 +141,35 @@ const ShedulingDetails = () => {
           </CalendarIcon>
 
           <DateInfo>
-            <DateTitle>DE</DateTitle>
-            <DateValue>18/08/2001</DateValue>
+            <DateTitle>De</DateTitle>
+
+            <DateValue>{format(new Date(dates[0]), 'dd/MM/yyyy')}</DateValue>
           </DateInfo>
 
           <Feather
-            name='chevron-right'
             size={RFValue(10)}
+            name='chevron-right'
             color={theme.colors.text}
           />
 
           <DateInfo>
-            <DateTitle>DE</DateTitle>
-            <DateValue>18/08/2001</DateValue>
+            <DateTitle>Até</DateTitle>
+
+            <DateValue>
+              {format(new Date(dates[dates.length - 1]), 'dd/MM/yyyy')}
+            </DateValue>
           </DateInfo>
         </RentalPeriod>
 
         <RentalPrice>
           <RentalPriceLabel>TOTAL</RentalPriceLabel>
+
           <RentalPriceDetails>
-            <RentalPriceQuota>R$ 580 x3 diárias</RentalPriceQuota>
-            <RentalPriceTotal>R$ 2.900</RentalPriceTotal>
+            <RentalPriceQuota>
+              R$ {car.rent.price} x{dates.length} diárias
+            </RentalPriceQuota>
+
+            <RentalPriceTotal>R$ {totalRent}</RentalPriceTotal>
           </RentalPriceDetails>
         </RentalPrice>
       </CarContent>
@@ -136,6 +177,8 @@ const ShedulingDetails = () => {
       <Footer>
         <Button
           title='Alugar agora'
+          loading={loading}
+          enabled={!loading}
           onPress={handleConfirm}
           color={theme.colors.success}
         />

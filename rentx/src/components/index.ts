@@ -5,13 +5,15 @@ import Button from './Button'
 import Car from './Car'
 import ImageSlider from './ImageSlider'
 import ConfirmButton from './ConfirmButton'
+import Load from './Load'
 
 export {
-  ImageSlider,
+  Car,
+  Load,
   Button,
+  Calendar,
   Accessory,
   BackButton,
-  Car,
-  Calendar,
+  ImageSlider,
   ConfirmButton
 }

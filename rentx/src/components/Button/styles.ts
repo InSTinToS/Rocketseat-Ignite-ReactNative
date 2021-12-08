@@ -4,6 +4,7 @@ import styled from 'styled-components/native'
 
 interface ContainerProps extends RectButtonProps {
   color?: string
+  enabled: boolean
 }
 
 export const Title = styled.Text`
@@ -24,5 +25,6 @@ export const Container = styled(RectButton)<ContainerProps>`
   font-family: ${({ theme }) => theme.fonts.primary_500};
 
   color: ${({ theme }) => theme.colors.shape};
+  opacity: ${({ enabled }) => (enabled ? 1 : 0.5)};
   background-color: ${({ theme, color }) => color || theme.colors.main};
 `

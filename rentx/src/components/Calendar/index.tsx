@@ -1,6 +1,8 @@
 import React from 'react'
 import { ViewStyle } from 'react-native'
 
+import dates from 'src/locales/dates'
+
 import { Feather } from '@expo/vector-icons'
 import {
   Calendar as NativeCalendar,
@@ -12,51 +14,10 @@ import { useTheme } from 'styled-components'
 
 interface CalendarProps extends NativeCalendarProps {}
 
-LocaleConfig.locales['pt-br'] = {
-  monthNames: [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro'
-  ],
-  monthNamesShort: [
-    'Jan',
-    'Fev',
-    'Mar',
-    'Abr',
-    'Mai',
-    'Jun',
-    'Jul',
-    'Ago',
-    'Set',
-    'Out',
-    'Nov',
-    'Dez'
-  ],
-  dayNames: [
-    'Domingo',
-    'Segunda',
-    'Terça',
-    'Quarta',
-    'Quinta',
-    'Sexta',
-    'Sábado'
-  ],
-  dayNamesShort: ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SAB'],
-  today: 'Hoje'
-}
-
+LocaleConfig.locales['pt-br'] = dates
 LocaleConfig.defaultLocale = 'pt-br'
 
-const Calendar = ({ ...props }: CalendarProps) => {
+const Calendar = ({ markedDates, onDayPress, ...props }: CalendarProps) => {
   const theme = useTheme()
 
   const headerStyle: ViewStyle = {
@@ -91,10 +52,13 @@ const Calendar = ({ ...props }: CalendarProps) => {
   return (
     <NativeCalendar
       firstDay={1}
-      theme={calendarTheme}
-      renderArrow={renderArrow}
-      headerStyle={headerStyle}
       minDate={new Date()}
+      markingType='period'
+      theme={calendarTheme}
+      onDayPress={onDayPress}
+      renderArrow={renderArrow}
+      markedDates={markedDates}
+      headerStyle={headerStyle}
       {...props}
     />
   )
