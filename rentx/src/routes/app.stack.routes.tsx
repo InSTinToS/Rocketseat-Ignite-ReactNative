@@ -2,37 +2,29 @@ import React from 'react'
 
 import {
   CarDetails,
+  Confirmation,
   Home,
-  MyCars,
   Scheduling,
-  SchedulingComplete,
-  SchedulingDetails,
-  Splash
+  SchedulingDetails
 } from 'src/screens'
 
 import { createStackNavigator } from '@react-navigation/stack'
 
 const { Navigator: StackNavigator, Screen } = createStackNavigator()
 
-const StackRoutes = () => {
+const AppStackRoutes = () => {
   return (
     <StackNavigator
-      initialRouteName='Splash'
+      initialRouteName='Home'
       screenOptions={{ headerShown: false }}
     >
-      <Screen
-        name='Home'
-        component={Home}
-        options={{ gestureEnabled: false }}
-      />
-      <Screen name='Splash' component={Splash} />
-      <Screen name='MyCars' component={MyCars} />
+      <Screen name='Home' component={Home} />
       <Screen name='Scheduling' component={Scheduling} />
       <Screen name='CarDetails' component={CarDetails} />
       <Screen name='SchedulingDetails' component={SchedulingDetails} />
-      <Screen name='SchedulingComplete' component={SchedulingComplete} />
+      <Screen name='Confirmation' component={Confirmation} />
     </StackNavigator>
   )
 }
 
-export default StackRoutes
+export default AppStackRoutes

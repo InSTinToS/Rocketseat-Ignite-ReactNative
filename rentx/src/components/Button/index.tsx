@@ -7,6 +7,7 @@ import { useTheme } from 'styled-components'
 
 interface Props extends RectButtonProps {
   title: string
+  light?: boolean
   color?: string
   loading?: boolean
 }
@@ -15,6 +16,7 @@ const Button = ({
   title,
   enabled = true,
   color,
+  light = false,
   loading = false,
   ...props
 }: Props) => {
@@ -25,7 +27,7 @@ const Button = ({
       {loading ? (
         <ActivityIndicator color={theme.colors.shape} />
       ) : (
-        <Title>{title}</Title>
+        <Title light={light}>{title}</Title>
       )}
     </Container>
   )

@@ -1,23 +1,25 @@
 import { CarType } from 'src/utils/getAccessoryIcon'
 
-export type AccessoriesResType = {
-  type: keyof CarType
-  name: string
+export type PhotosResType = {
+  id: string
+  photo: string
 }[]
 
-export interface RentResType {
-  price: string
-  period: string
-}
+export type AccessoriesResType = {
+  id: string
+  name: string
+  type: keyof CarType
+}[]
 
 export interface CarResType {
   id: string
   name: string
   brand: string
   about: string
-  photos: string[]
+  price: string
+  period: string
   thumbnail: string
-  rent: RentResType
+  photos: PhotosResType
   accessories: AccessoriesResType
   fuel_type: 'hybrid_motor' | 'electric' | 'gasoline_motor'
 }

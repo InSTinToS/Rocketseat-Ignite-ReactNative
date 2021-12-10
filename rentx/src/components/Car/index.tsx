@@ -1,5 +1,4 @@
 import React from 'react'
-import { Text } from 'react-native'
 import {
   About,
   Brand,
@@ -45,9 +44,9 @@ const Car = ({ data, ...props }: Props) => {
 
         <About>
           <Rent>
-            <Period>{data.rent.period}</Period>
+            <Period>{data.period}</Period>
 
-            <Price>{`R$ ${data.rent.price}`}</Price>
+            <Price>{`R$ ${data.price}`}</Price>
           </Rent>
 
           <Type>

@@ -4,15 +4,25 @@ import { StatusBar, useWindowDimensions } from 'react-native'
 
 import { BrandBackground, Done } from 'src/assets'
 import { ConfirmButton } from 'src/components'
+import { NavigationProps } from 'src/types/react-native/navigation'
 
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 
-const SchedulingComplete = () => {
+export interface Params {
+  title: string
+  message: string
+  nextScreen: string
+}
+
+const Confirmation = () => {
+  const route = useRoute()
   const { width } = useWindowDimensions()
-  const navigation = useNavigation()
+  const navigation = useNavigation<NavigationProps<void>>()
+
+  const { title, message, nextScreen } = route.params as Params
 
   const handleConfirm = () => {
-    navigation.navigate('Home' as never)
+    navigation.navigate(nextScreen)
   }
   return (
     <Container>
@@ -26,12 +36,8 @@ const SchedulingComplete = () => {
 
       <Content>
         <Done />
-        <Title>Carro alugado</Title>
-        <Message>
-          Agora você só precisa ir {'\n'}
-          até a concessionária do RENTX{'\n'}
-          pegar o seu atomóvel.
-        </Message>
+        <Title>{title}</Title>
+        <Message>{message}</Message>
       </Content>
 
       <Footer>
@@ -41,4 +47,4 @@ const SchedulingComplete = () => {
   )
 }
 
-export default SchedulingComplete
+export default Confirmation

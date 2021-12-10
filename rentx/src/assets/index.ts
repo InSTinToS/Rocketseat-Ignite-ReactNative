@@ -12,11 +12,15 @@ import Arrow from '../../static/arrow.svg'
 import Logo from '../../static/logo.svg'
 import Done from '../../static/done.svg'
 import LoadCar from '../../static/load_animated.json'
+import Home from '../../static/home.svg'
+import Car from '../../static/car.svg'
 
 export {
+  Car,
   Logo,
   Done,
   Arrow,
+  Home,
   Speed,
   Brand,
   Force,

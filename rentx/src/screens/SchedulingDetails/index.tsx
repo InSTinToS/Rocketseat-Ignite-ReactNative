@@ -26,6 +26,7 @@ import {
 } from './styles'
 import { Alert, StatusBar } from 'react-native'
 
+import { Params as ConfirmationParams } from 'src/screens/Confirmation'
 import { Accessory, BackButton, Button, ImageSlider } from 'src/components'
 import { NavigationProps } from 'src/types/react-native/navigation'
 import { CarResType } from 'src/types/res/Car'
@@ -55,7 +56,8 @@ const ShedulingDetails = () => {
   const theme = useTheme()
   const [loading, setLoading] = useState(false)
 
-  const navigation = useNavigation<NavigationProps<Params | void>>()
+  const navigation =
+    useNavigation<NavigationProps<Params | void | ConfirmationParams>>()
   const route = useRoute()
   const { car, dates } = route.params as Params
 
@@ -80,7 +82,14 @@ const ShedulingDetails = () => {
         id: car.id,
         unavailable_dates: unavailableDates
       })
-      .then(() => navigation.navigate('SchedulingComplete'))
+      .then(() =>
+        navigation.navigate('Confirmation', {
+          nextScreen: 'Home',
+          title: 'Carro alugado',
+          message:
+            'Agora você só precisa ir \naté a concessionária do RENTX\npegar o seu atomóvel.'
+        })
+      )
       .catch(() => {
         setLoading(false)
         Alert.alert('Não foi possível confirmar o agendamento')

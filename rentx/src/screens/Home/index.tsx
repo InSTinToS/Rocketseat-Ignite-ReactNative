@@ -28,36 +28,36 @@ interface CarDetailsParams {
 
 type Params = CarDetailsParams | void
 
-const ButtonAnimated = Animated.createAnimatedComponent(RectButton)
+// const ButtonAnimated = Animated.createAnimatedComponent(RectButton)
 
 const Home = () => {
   const [loading, setLoading] = useState(true)
   const [cars, setCars] = useState<CarResType[]>()
   const navigation = useNavigation<NavigationProps<Params>>()
 
-  const positionY = useSharedValue(0)
-  const positionX = useSharedValue(0)
+  // const positionY = useSharedValue(0)
+  // const positionX = useSharedValue(0)
 
-  const onGestureEvent = useAnimatedGestureHandler({
-    onStart: (_: any) => {},
-    onActive: event => {
-      positionX.value = event.translationX
-      positionY.value = event.translationY
-    },
-    onEnd: () => {
-      positionX.value = withSpring(0)
-      positionY.value = withSpring(0)
-    }
-  })
+  // const onGestureEvent = useAnimatedGestureHandler({
+  //   onStart: (_: any) => {},
+  //   onActive: event => {
+  //     positionX.value = event.translationX
+  //     positionY.value = event.translationY
+  //   },
+  //   onEnd: () => {
+  //     positionX.value = withSpring(0)
+  //     positionY.value = withSpring(0)
+  //   }
+  // })
 
-  const myCarsButtonStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: positionX.value },
-      { translateY: positionY.value }
-    ]
-  }))
+  // const myCarsButtonStyle = useAnimatedStyle(() => ({
+  //   transform: [
+  //     { translateX: positionX.value },
+  //     { translateY: positionY.value }
+  //   ]
+  // }))
 
-  const theme = useTheme()
+  // const theme = useTheme()
 
   const handleCarDetails = (car: CarResType) => {
     navigation.navigate('CarDetails', { car })
@@ -114,7 +114,7 @@ const Home = () => {
         />
       )}
 
-      <PanGestureHandler onGestureEvent={onGestureEvent}>
+      {/* <PanGestureHandler onGestureEvent={onGestureEvent}>
         <Animated.View
           style={[
             myCarsButtonStyle,
@@ -136,19 +136,19 @@ const Home = () => {
             />
           </ButtonAnimated>
         </Animated.View>
-      </PanGestureHandler>
+      </PanGestureHandler> */}
     </Container>
   )
 }
 
-const styles = StyleSheet.create({
-  button: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 60,
-    height: 60,
-    borderRadius: 30
-  }
-})
+// const styles = StyleSheet.create({
+//   button: {
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     width: 60,
+//     height: 60,
+//     borderRadius: 30
+//   }
+// })
 
 export default Home

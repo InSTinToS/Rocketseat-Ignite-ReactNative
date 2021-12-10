@@ -7,11 +7,16 @@ interface ContainerProps extends RectButtonProps {
   enabled: boolean
 }
 
-export const Title = styled.Text`
+interface TitleProps {
+  light: boolean
+}
+
+export const Title = styled.Text<TitleProps>`
   font-size: ${RFValue(15)}px;
   font-family: ${({ theme }) => theme.fonts.primary_500};
 
-  color: ${({ theme }) => theme.colors.shape};
+  color: ${({ theme, light }) =>
+    light ? theme.colors.header : theme.colors.shape};
 `
 
 export const Container = styled(RectButton)<ContainerProps>`

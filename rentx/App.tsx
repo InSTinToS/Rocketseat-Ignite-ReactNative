@@ -1,7 +1,7 @@
 import React from 'react'
 
-import theme from './src/styles/theme'
 import Routes from 'src/routes'
+import AppProvider from 'src/hooks'
 
 import {
   Archivo_400Regular,
@@ -11,7 +11,6 @@ import {
 import { Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter'
 import AppLoading from 'expo-app-loading'
 import { useFonts } from 'expo-font'
-import { ThemeProvider } from 'styled-components'
 
 const App = () => {
   const [fontsLoaded] = useFonts({
@@ -25,9 +24,9 @@ const App = () => {
   if (!fontsLoaded) return <AppLoading />
 
   return (
-    <ThemeProvider theme={theme}>
+    <AppProvider>
       <Routes />
-    </ThemeProvider>
+    </AppProvider>
   )
 }
 
