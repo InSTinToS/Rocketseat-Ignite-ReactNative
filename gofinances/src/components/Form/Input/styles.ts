@@ -3,6 +3,7 @@ import styled, { css } from "styled-components/native";
 
 interface ContainerProps {
   error?: boolean;
+  active?: boolean;
 }
 
 export const Error = styled.Text`
@@ -26,9 +27,10 @@ export const Container = styled.TextInput<ContainerProps>`
   color: ${({ theme }) => theme.colors.text_dark};
   background-color: ${({ theme }) => theme.colors.shape};
 
-  ${({ theme, error }) =>
-    error &&
+  ${({ theme, error, active }) =>
+    (error || active) &&
     css`
-      border: solid 1px ${theme.colors.attention};
+      border-width: 3px;
+      border-color: ${theme.colors.attention};
     `};
 `;

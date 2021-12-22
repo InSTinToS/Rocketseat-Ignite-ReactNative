@@ -14,7 +14,6 @@ import { StatusBar } from "react-native";
 
 import { AuthProvider, useAuth } from "./src/hooks/auth";
 import Routes from "./src/routes/index.routes";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const App = () => {
   const { userStorageLoading } = useAuth();

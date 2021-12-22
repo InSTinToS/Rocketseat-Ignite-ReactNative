@@ -10,9 +10,6 @@ import * as AppleAuth from "expo-apple-authentication";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import collections from "../utils/collections";
 
-const { CLIENT_ID } = process.env;
-const { REDIRECT_URI } = process.env;
-
 interface User {
   id: string;
   name: string;
@@ -50,17 +47,17 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
   const [userStorageLoading, setUserStorageLoading] = useState(true);
 
   const withGoogle = async () => {
+    console.log();
+
     try {
       const RESPONSE_TYPE = "token";
       const scope = encodeURI("profile email");
 
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${scope}`;
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${scope}`;
 
       const res = (await AuthSession.startAsync({
         authUrl,
       })) as AuthResponse;
-
-      console.log(res);
 
       const { type, params } = res;
 
@@ -70,8 +67,6 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
         );
 
         const userInfo = await res.json();
-
-        console.log(userInfo);
 
         setUser({
           id: userInfo.id,

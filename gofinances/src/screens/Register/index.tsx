@@ -161,6 +161,7 @@ const Register = () => {
                 </TransactionsTypes>
 
                 <CategorySelect
+                  testID="button-category"
                   title={category.label}
                   onPress={handleOpenModal}
                 />
@@ -171,7 +172,7 @@ const Register = () => {
           )}
         </Formik>
 
-        <Modal visible={categoryModal}>
+        <Modal testID="modal-category" visible={categoryModal}>
           <CategoryView
             category={category}
             setCategory={setCategory}

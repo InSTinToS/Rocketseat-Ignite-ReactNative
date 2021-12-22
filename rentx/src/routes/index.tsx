@@ -11,8 +11,7 @@ const Routes = () => {
 
   return (
     <NavigationProvider>
-      {/* {user?.id ? <AppTabRoutes /> : <AuthRoutes />} */}
-      <AuthRoutes />
+      {user?.id ? <AppTabRoutes /> : <AuthRoutes />}
     </NavigationProvider>
   )
 }
