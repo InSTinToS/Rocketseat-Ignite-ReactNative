@@ -48,29 +48,36 @@ const Home = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Hello World</Text>
+      <Text style={styles.title} testID="welcome">
+        Hello World
+      </Text>
 
       <Text style={styles.greeting}>{greeting}</Text>
 
       <TextInput
+        testID="input-new-skill"
         style={styles.input}
         placeholder="New skill"
         onChangeText={setNewSkill}
         placeholderTextColor="#555"
       />
 
-      <Button title="Add" onPress={handleAddNewSkill} />
+      <Button testID="button" title="Add" onPress={handleAddNewSkill} />
 
       <Text style={[styles.title, { marginVertical: 50 }]}>My Skills</Text>
 
-      <FlatList
-        data={mySkills}
-        keyExtractor={item => item.id}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item: { name, id } }) => (
-          <SkillCard name={name} onPress={() => handleRemoveSkill(id)} />
-        )}
-      />
+      {mySkills && (
+        <FlatList
+          testID="skills"
+          data={mySkills}
+          keyExtractor={item => item.id}
+          keyboardShouldPersistTaps="never"
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item: { name, id } }) => (
+            <SkillCard name={name} onPress={() => handleRemoveSkill(id)} />
+          )}
+        />
+      )}
     </SafeAreaView>
   );
 };
