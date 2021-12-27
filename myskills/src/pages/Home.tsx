@@ -7,6 +7,7 @@ import {
   Platform,
   FlatList,
 } from 'react-native';
+import SplashScreen from 'react-native-splash-screen';
 import Button from '../components/Native/Button';
 import SkillCard from '../components/SkillCard';
 
@@ -23,6 +24,10 @@ const Home = () => {
   const handleRemoveSkill = (id: string) => {
     setMySkills(before => before.filter(({ id: beforeId }) => beforeId !== id));
   };
+
+  useEffect(() => {
+    SplashScreen.hide();
+  }, []);
 
   const handleAddNewSkill = () => {
     const data = {
@@ -45,6 +50,14 @@ const Home = () => {
     console.clear();
     console.log(mySkills);
   }, [mySkills]);
+  /**
+   * Para mudar icone do android:
+   * abrir projeto no android studio (abir pasta android somente)
+   * botão direito em android/app -> new -> image assets
+   *
+   * Para alterar nome do app:
+   * android/app/src/main/res/values/strings.xml
+   */
 
   return (
     <SafeAreaView style={styles.container}>
